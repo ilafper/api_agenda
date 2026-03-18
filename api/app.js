@@ -49,6 +49,12 @@ app.post('/api/crearcliente', async (req, res) => {
     // recpger los datos 
     const {nombre, apellidos,telefono,direccion,correo} = req.body;
 
+    if(!nombre || !apellidos || !telefono || !direccion || !correo){
+      res.status(201).json({
+      success: true,
+      message: "rellena todos los campo correctamente"
+    });
+    }
     console.log("datos datos:",nombre, apellidos, telefono, direccion, correo);
     
     const { clientes } = await connectToMongoDB();
@@ -57,7 +63,7 @@ app.post('/api/crearcliente', async (req, res) => {
       nombre: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
       apellidos: z.string().min(3, "Los apellidos deben tener al menos 3 caracteres"),
       //valedar en el tlf no meter letras y un minimo y maximo
-      telefono: z.string() .regex(/^\d{7,15}$/, "El teléfono debe contener solo números (7-15 dígitos)").min(7,"minimo 7 digitos").max(15,'maximo 15 digitos'),
+      telefono: z.string().regex(/^\d+$/, "El teléfono debe contener solo números").min(7,"minimo 7 digitos").max(15,'maximo 15 digitos'),
       correo: z.email("Correo electrónico inválido"),
       direccion:z.string().min(5, "la direccion debe estar correcta ").max(100, 'la longitud no puede ser mayor que 100 caracteres'),
       
@@ -240,21 +246,12 @@ app.get("/api/filtrotelefono/:tlfBusqueda", async (req, res) => {
       return res.json({ success: false, error:"no hay coincidencias"});
     }
 
-    let lista_telefonos=[]
-
-    for(let cada_tele of filtrotelefono){
-      lista_telefonos.push(cada_tele.telefono);
-    }
-    console.log("solo telefonos",lista_telefonos);
-    
-
-    res.json({ success: true, mensaje:"todas las coincidencias", datos: lista_telefonos });
+    res.json({ success: true, mensaje:"resultado filtro: ", datos: filtrotelefono });
 
   } catch (error) {
     res.status(500).json({ success: false, error: "Error al encontrar", detalle: error.message });
   }
 });
-
 
 
 
@@ -288,6 +285,35 @@ app.get("/api/filtrocorreo/:correoBusqueda", async (req, res) => {
 });
 
 
+
+app.get("/api/filtrodireccion/:direcionBusqueda", async (req, res) => {
+  const { clientes } = await connectToMongoDB();
+
+  try {
+    const filtroDirec = req.params.direcionBusqueda; 
+    console.log("Buscando correo:", filtroDirec);
+
+    if (!filtroDirec) {
+      return res.status(400).json({ success: false, error: "Debes enviar un dato" });
+    }
+
+    // busqueda parcial del campo correo
+    const filtrodireccion = await clientes.find({ direccion: new RegExp(filtroDirec, 'i') }).toArray();
+    
+    console.log(filtrodireccion);
+
+    if (filtrodireccion.length=== 0 ) {
+      console.log("no hay coincidencias");
+      return res.json({ success: false, error:"no hay coincidencias"});
+    }
+    
+
+    res.json({ success: true, mensaje:"todas las coincidencias", datos: filtrodireccion });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Error al encontrar", detalle: error.message });
+  }
+});
 
 
 
