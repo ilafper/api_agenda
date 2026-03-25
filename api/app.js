@@ -39,7 +39,7 @@ app.get('/api/clientes', async (req, res) => {
     
     res.json({ success: true,mensaje:"todos los clientes Sisi" , lista_clientes});
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los mangas' });
+    res.status(500).json({ error: 'Error al obtener los clientes' });
   }
 });
 
@@ -56,6 +56,10 @@ app.post('/api/crearcliente', async (req, res) => {
     });
     }
     console.log("datos datos:",nombre, apellidos, telefono, direccion, correo);
+    // quitar espacio al inicio y fin.
+
+    let tele= telefono.trim();
+    console.log("tele tele telefono",tele);
     
     const { clientes } = await connectToMongoDB();
     // crear el esquema para validar con zod
@@ -63,11 +67,10 @@ app.post('/api/crearcliente', async (req, res) => {
       nombre: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
       apellidos: z.string().min(3, "Los apellidos deben tener al menos 3 caracteres"),
       //valedar en el tlf no meter letras y un minimo y maximo
-      telefono: z.string().regex(/^\d+$/, "El teléfono debe contener solo números").min(7,"minimo 7 digitos").max(15,'maximo 15 digitos'),
+      tele: z.string().regex(/^\d+$/, "El teléfono debe contener solo números").min(7,"minimo 7 digitos").max(15,'maximo 15 digitos'),
       correo: z.email("Correo electrónico inválido"),
       direccion:z.string().min(5, "la direccion debe estar correcta ").max(100, 'la longitud no puede ser mayor que 100 caracteres'),
-      
-    }).safeParse({nombre, apellidos,telefono,direccion,correo});
+    }).safeParse({nombre, apellidos,tele,direccion,correo});
 
     // coger el mensaje de error para mostarar
      if (!resultado.success) {
@@ -84,7 +87,7 @@ app.post('/api/crearcliente', async (req, res) => {
 
 
     // Verificar correo duplicado
-    const usuarioExistente = await clientes.findOne({ correo });
+    const usuarioExistente = await clientes.findOne({ correo: correo.toLowerCase()});
     
     if (usuarioExistente) {
       return res.status(409).json({ 
@@ -100,7 +103,7 @@ app.post('/api/crearcliente', async (req, res) => {
     const nuevoUsuario = {
       nombre,
       apellidos,
-      telefono,
+      telefono:tele,
       direccion,
       correo,
       code_user
@@ -118,7 +121,7 @@ app.post('/api/crearcliente', async (req, res) => {
       user: {
         nombre,
         apellidos,
-        telefono,
+        tele,
         direccion,
         correo,
         code_user
