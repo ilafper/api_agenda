@@ -1,6 +1,5 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const { ObjectId } = require('mongodb');
 
 const { z, regex } = require('zod');
 const app = express();
