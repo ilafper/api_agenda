@@ -54,6 +54,7 @@ app.post('/api/crearcliente', async (req, res) => {
       message: "rellena todos los campo correctamente"
     });
     }
+    
     console.log("datos datos:",nombre, apellidos, telefono, direccion, correo);
     // quitar espacio al inicio y fin.
 
@@ -139,6 +140,7 @@ app.post('/api/crearcliente', async (req, res) => {
 
 
  //eliminar producto por id
+ 
 app.delete("/api/eliminarcliente/:id", async (req, res) => {
   const { clientes } = await connectToMongoDB();
 
