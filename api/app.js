@@ -38,7 +38,7 @@ app.get('/api/clientes', async (req, res) => {
     
     res.json({ success: true,mensaje:"todos los clientes Sisi" , lista_clientes});
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los clientes' });
+    res.status(400).json({ error: 'Error al obtener los clientes' });
   }
 });
 
@@ -49,8 +49,8 @@ app.post('/api/crearcliente', async (req, res) => {
     const {nombre, apellidos,telefono,direccion,correo} = req.body;
 
     if(!nombre || !apellidos || !telefono || !direccion || !correo){
-      res.status(201).json({
-      success: true,
+      res.status(400).json({
+      success: false,
       message: "rellena todos los campo correctamente"
     });
     }
@@ -90,7 +90,7 @@ app.post('/api/crearcliente', async (req, res) => {
     const usuarioExistente = await clientes.findOne({ correo: correo.toLowerCase()});
     
     if (usuarioExistente) {
-      return res.status(409).json({ 
+      return res.status(400).json({ 
         success: false,
         message: "El correo ya está registrado" 
       });
@@ -115,7 +115,7 @@ app.post('/api/crearcliente', async (req, res) => {
     await clientes.insertOne(nuevoUsuario);
 
     // mensaje final correcto si fue bien
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: "Usuario creado exitosamente",
       user: {
